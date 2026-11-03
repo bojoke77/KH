@@ -192,7 +192,7 @@ function show(id){document.querySelectorAll('.flow').forEach(x=>x.classList.remo
 
 function refreshHome(){const all=getRankings(),best=all.reduce((m,x)=>Math.max(m,x.score||0),0);$('participantCount').textContent=all.length+'명';$('bestScore').textContent=best+'%';
 
-const top=all.slice().sort((a,b)=>b.score-a.score||a.at-b.at).slice(0,12);$('topBoard').innerHTML=top.length?top.map((x,i)=>`<li><span class="medal">${i<3?['?','?','?'][i]:i+1}</span><span class="top-main"><span class="top-name">${esc(x.name)}</span><span class="top-meta">${esc(x.grade||'')} ${esc(x.className||'')}반 ${esc(x.number||'')}번</span></span><span class="top-idol">
+const top=all.slice().sort((a,b)=>b.score-a.score||a.at-b.at).slice(0,12);$('topBoard').innerHTML=top.length?top.map((x,i)=>`<li><span class="medal">${i<3?['&#x1F947;','&#x1F948;','&#x1F949;'][i]:i+1}</span><span class="top-main"><span class="top-name">${esc(x.name)}</span><span class="top-meta">${esc(x.grade||'')} ${esc(x.className||'')}반 ${esc(x.number||'')}번</span></span><span class="top-idol">
 
   <img
 
@@ -252,7 +252,7 @@ function prevQuestion(){if(questionIndex>0){questionIndex--;renderQuestion()}}
 
 function openBox(btn){if(selectedBonus!==null)return;
 
-const prizes=[{bonus:5,label:'+5%',text:'대박! 매칭 점수 +5% 보너스 ?'},{bonus:3,label:'+3%',text:'행운이 왔어요! 매칭 점수 +3% 보너스 ✨'},{bonus:0,label:'꽝 ?',text:'아쉽지만 다음에는 더 큰 행운이!'}];
+const prizes=[{bonus:5,label:'+5%',text:'대박! 매칭 점수 +5% 보너스 &#x1F389;'},{bonus:3,label:'+3%',text:'행운이 왔어요! 매칭 점수 +3% 보너스 &#x2728;'},{bonus:0,label:'꽝 &#x1F605;',text:'아쉽지만 다음에는 더 큰 행운이!'}];
 
 const p=prizes[Math.floor(Math.random()*prizes.length)];selectedBonus=p.bonus;document.querySelectorAll('.box-choice').forEach(x=>x.disabled=true);btn.classList.add('open');$('boxReward').innerHTML=`<strong>${p.label}</strong><small>${p.text}<br>최대 보너스 +5% 조건이 적용됩니다.</small>`;setTimeout(runAnalysis,900)}
 
@@ -266,7 +266,7 @@ function grade(s){return s>=100?'SSS':s>=98?'SS':s>=95?'S':s>=85?'A':s>=70?'B':'
 
 
 
-function titleFor(s){return s>=100?'? 운명의 최애':s>=98?'? 최애의 신':s>=95?'✨ 레전드 결과':'? 최애 마스터'}
+function titleFor(s){return s>=100?'&#x1F308; 운명의 최애':s>=98?'&#x1F451; 최애의 신':s>=95?'&#x2728; 레전드 결과':'&#x1F3C6; 최애 마스터'}
 
 
 
@@ -298,13 +298,13 @@ const x=c.getContext('2d'),s=c.width,n=q.getModuleCount(),cell=s/n;x.fillStyle='
 
 function renderResult(){const {name,top,all,rank,bonus}=lastResult;
 
-const score=top.match,g=grade(score),comment=score>=98?'? '+top.idol.name+'와 함께라면 최고의 케미가 펼쳐집니다!':score>=95?'✨ '+top.idol.name+'와 만나면 대화가 끊길 확률 0%!':'? 서로의 매력을 발견하는 즐거운 조합입니다.';
+const score=top.match,g=grade(score),comment=score>=98?'&#x1F451; '+top.idol.name+'와 함께라면 최고의 케미가 펼쳐집니다!':score>=95?'&#x2728; '+top.idol.name+'와 만나면 대화가 끊길 확률 0%!':'&#x1F496; 서로의 매력을 발견하는 즐거운 조합입니다.';
 
 const report=[['외향성',Math.round(answers[0]===0?90:answers[0]===1?65:40)],['유머감각',Math.round(answers[5]===0?95:answers[5]===1?75:55)],['활동성',Math.round(answers[3]===0?90:answers[3]===1?70:45)],['감성지수',Math.round(answers[9]===2?95:answers[9]===1?78:60)],['친화력',Math.round(answers[1]===0?98:answers[1]===1?75:50)]];
 
-const top3=all.slice(0,3);$('result').innerHTML=`<div class="result-head"><div class="step-title"><small>STEP 5</small><h2>? 당신의 최애는</h2></div><img class="idol-photo" src="img/${top.idol.file}" alt="${top.idol.name} 사진"><h1>${top.idol.name}</h1><p class="title-badge">${titleFor(score)}</p><div class="match">${score}%</div><div class="grade">? ${g}</div><p class="note">럭키박스 보너스 +${bonus}% 적용</p><div class="comment">${comment}</div></div>
+const top3=all.slice(0,3);$('result').innerHTML=`<div class="result-head"><div class="step-title"><small>STEP 5</small><h2>&#x1F31F; 당신의 최애는</h2></div><img class="idol-photo" src="img/${top.idol.file}" alt="${top.idol.name} 사진"><h1>${top.idol.name}</h1><p class="title-badge">${titleFor(score)}</p><div class="match">${score}%</div><div class="grade">&#x1F3C6; ${g}</div><p class="note">럭키박스 보너스 +${bonus}% 적용</p><div class="comment">${comment}</div></div>
 
-<div class="stat"><span>? 현재 순위</span><b>${rank}위 / ${all.length}명</b></div><div class="stat"><span>? 럭키박스</span><b>+${bonus}%</b></div></div><h2>? Top3</h2><div class="rank-cards">${top3.map((x,i)=>`<div class="rank-card"><b>${['?','?','?'][i]} ${esc(x.name)}</b><small>${x.score}% · ${x.idol}</small></div>`).join('')}</div><div class="qr"><h2>? 결과 QR</h2><canvas id="qrCanvas" width="520" height="520"></canvas></div><div class="actions"><button id="savePng" class="secondary">? PNG 저장</button><button id="retry" class="primary">? 다시 도전</button><button id="homeFromResult" class="secondary">? 첫 화면</button></div>`;
+<div class="stat"><span>&#x1F3C5; 현재 순위</span><b>${rank}위 / ${all.length}명</b></div><div class="stat"><span>&#x1F381; 럭키박스</span><b>+${bonus}%</b></div></div><h2>&#x1F3C6; Top3</h2><div class="rank-cards">${top3.map((x,i)=>`<div class="rank-card"><b>${['&#x1F947;','&#x1F948;','&#x1F949;'][i]} ${esc(x.name)}</b><small>${x.score}% · ${x.idol}</small></div>`).join('')}</div><div class="qr"><h2>&#x1F4F1; 결과 QR</h2><canvas id="qrCanvas" width="520" height="520"></canvas></div><div class="actions"><button id="savePng" class="secondary">&#x1F4F8; PNG 저장</button><button id="retry" class="primary">&#x1F504; 다시 도전</button><button id="homeFromResult" class="secondary">&#x1F3E0; 첫 화면</button></div>`;
 
 const img=document.querySelector('.idol-photo');img.onerror=()=>{img.src='data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#ff7aa8"/><text x="50%" y="55%" text-anchor="middle" font-size="180" fill="white">${top.idol.name.slice(0,1)}</text></svg>`)};
 
@@ -314,7 +314,7 @@ const text=qrText();if($('qrPreview'))$('qrPreview').textContent=text;drawQr(tex
 
 function saveResultPng(){const {name,top,rank,bonus}=lastResult,c=document.createElement('canvas');c.width=1000;c.height=1250;
 
-const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.textAlign='center';x.fillStyle='#ff2d75';x.font='bold 42px sans-serif';x.fillText('? AI 최애 찾기',500,75);x.fillStyle='#252735';x.font='bold 42px sans-serif';x.fillText(`${name}님의 최애`,500,140);x.font='bold 70px sans-serif';x.fillText(top.idol.name,500,240);x.fillStyle='#ff2d75';x.font='bold 110px sans-serif';x.fillText(`${top.match}%`,500,380);x.fillStyle='#e1a600';x.font='bold 52px sans-serif';x.fillText(`? ${grade(top.match)}`,500,470);x.fillStyle='#252735';x.font='28px sans-serif';x.fillText(`럭키박스 +${bonus}% · 현재 ${rank}위`,500,540);
+const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.textAlign='center';x.fillStyle='#ff2d75';x.font='bold 42px sans-serif';x.fillText('\u{1F31F} AI 최애 찾기',500,75);x.fillStyle='#252735';x.font='bold 42px sans-serif';x.fillText(`${name}님의 최애`,500,140);x.font='bold 70px sans-serif';x.fillText(top.idol.name,500,240);x.fillStyle='#ff2d75';x.font='bold 110px sans-serif';x.fillText(`${top.match}%`,500,380);x.fillStyle='#e1a600';x.font='bold 52px sans-serif';x.fillText(`\u{1F3C6} ${grade(top.match)}`,500,470);x.fillStyle='#252735';x.font='28px sans-serif';x.fillText(`럭키박스 +${bonus}% · 현재 ${rank}위`,500,540);
 
 const q=$('qrCanvas');if(q)x.drawImage(q,300,650,400,400);
 
