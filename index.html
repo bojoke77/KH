@@ -1,0 +1,99 @@
+<!doctype html>
+
+<html lang="ko">
+
+<head>
+
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>&#x1F31F; 나랑 어울리는 걸? </title>
+
+  <link rel="stylesheet" href="idol.css">
+
+</head>
+
+<body><main class="wrap">
+
+<section id="home" class="flow active">
+
+ <header class="hero"><h1>&#x1F31F; 나랑 어울리는 걸? </h1><p>10가지 질문으로 나와 가장 잘 맞는 아이돌을 찾아보세요</p><div class="stats"><div class="stat"><span>현재 참가자</span><b id="participantCount">0명</b></div><div class="stat"><span>오늘 최고 매칭률</span><b id="bestScore">0%</b></div></div></header>
+
+ <div class="hero-actions"><button id="startBtn" class="primary big-btn">&#x2764;&#xFE0F; 나만의 최애 찾기</button></div>
+
+ <section class="board"><div class="panel"><h2>&#x1F3C6; Top12 최애 랭킹</h2><ol id="topBoard" class="top-list"></ol><p class="note">실시간 LocalStorage 기준</p></div><div class="panel"><h2>&#x1F525; 현재 최애 분포</h2><div id="idolChart"></div><p class="note">참가자들의 매칭 결과 분포</p></div></section>
+
+ <div class="admin"><button id="adminBtn">&#x1F512; 관리자</button></div>
+
+</section>
+
+
+
+<section id="wizard" class="flow"><div class="home-nav"><button id="homeBtn" type="button">&#x1F3E0; 첫 화면</button></div>
+
+ <section id="step1" class="panel">
+
+  <div class="step-title">
+
+    <small>STEP 1</small>
+
+    <h2>참가자 정보를 입력하세요</h2>
+
+  </div>
+
+  <div class="student-grid">
+
+    <div class="student-field">
+
+      <label for="studentName">이름</label>
+
+      <input id="studentName" maxlength="20" placeholder="이름" autocomplete="name">
+
+    </div>
+
+    <div class="student-field">
+
+      <label for="studentGrade">학년</label>
+
+      <select id="studentGrade"><option value="">학년</option><option>1학년</option><option>2학년</option><option>3학년</option></select>
+
+    </div>
+
+    <div class="student-field">
+
+      <label for="studentClass">반</label>
+
+      <input id="studentClass" inputmode="numeric" maxlength="3" placeholder="반">
+
+    </div>
+
+    <div class="student-field">
+
+      <label for="studentNumber">번호</label>
+
+      <input id="studentNumber" inputmode="numeric" maxlength="3" placeholder="번호">
+
+    </div>
+
+  </div>
+
+  <div id="nameError" class="error hidden">이름·학년·반·번호를 모두 입력해 주세요.</div>
+
+  <button id="nameNext" class="primary" style="width:100%;max-width:700px;display:block;margin:16px auto 0">다음 →</button>
+
+</section>
+
+ <section id="step2" class="panel hidden"><div class="step-title"><small>STEP 2</small><h2>나에 대해 알려주세요</h2></div><div class="question-card"><div class="progress-head"><span>질문 진행률</span><b id="progressText">1 / 10</b></div><div class="progress"><i id="progressBar" style="width:10%"></i></div><span id="questionCategory" class="title-badge"></span><h3 id="questionText"></h3><div id="optionList" class="option-list"></div><div class="question-nav"><button id="prevQuestion" class="secondary">← 이전</button><button id="nextQuestion" class="primary">다음 →</button></div></div></section>
+
+ <section id="step3" class="panel lucky hidden"><div class="step-title"><small>STEP 3</small><h2>&#x1F381; AI 보너스 기회!</h2><p>상자 3개 중 하나를 선택하세요</p></div><div class="boxes"><button class="box-choice" data-box="0">&#x1F381;</button><button class="box-choice" data-box="1">&#x1F381;</button><button class="box-choice" data-box="2">&#x1F381;</button></div><div id="boxReward" class="reward">상자를 선택하면 보너스가 공개됩니다.</div></section>
+
+ <section id="step4" class="panel analyzing hidden"><div class="step-title"><small>STEP 4</small><h2>&#x1F9E0; AI가 최애를 분석중...</h2></div><div class="heart-line">&#x2764;&#xFE0F; &#x2764;&#xFE0F; &#x2764;&#xFE0F;</div><p class="note">당신의 답변과 아이돌 케미를 계산하고 있습니다.</p></section>
+
+ <section id="result" class="panel result hidden"></section>
+
+</section>
+
+</main>
+
+<div id="adminModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="adminTitle"><div class="modal-box admin-box"><div class="modal-head"><h3 id="adminTitle">관리자 관리</h3><button id="closeAdmin" class="close" aria-label="관리자 관리창 닫기">&#x2715;</button></div><p class="note">관리자 인증 후 명예의 전당 기록을 수정하거나 초기화할 수 있습니다.</p><div id="adminAuth"><input id="adminPassword" type="password" maxlength="4" placeholder="비밀번호 4자리"><div id="adminError" class="error hidden">비밀번호가 올바르지 않습니다.</div><div class="actions"><button id="cancelAdmin" class="secondary">취소</button><button id="confirmAdmin" class="primary">관리자 화면 열기</button></div></div><div id="adminEditor" class="hidden"><div class="admin-toolbar"><strong>현재 참가 기록</strong><span id="adminRecordCount" class="note"></span></div><div id="adminRecords" class="admin-records"></div><div class="actions"><button id="saveAdmin" class="primary">수정 내용 저장</button><button id="resetAdmin" class="danger">전체 기록 초기화</button></div></div></div></div>  <script src="idol_v7.js"></script>
+
+</body></html>
