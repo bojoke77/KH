@@ -16,11 +16,43 @@
 
 <section id="home" class="flow active">
 
- <header class="hero"><h1>&#x1F31F; 나랑 어울리는 걸? </h1><p>10가지 질문으로 나와 가장 잘 맞는 아이돌을 찾아보세요</p><div class="stats"><div class="stat"><span>현재 참가자</span><b id="participantCount">0명</b></div><div class="stat"><span>오늘 최고 매칭률</span><b id="bestScore">0%</b></div></div></header>
+ <header class="hero"><h1>&#x1F31F; 나랑 어울리는 걸? </h1><div class="stats"><div class="stat"><span>현재 참가자</span><b id="participantCount">0명</b></div><div class="stat"><span>오늘 최고 매칭률</span><b id="bestScore">0%</b></div></div></header>
 
- <div class="hero-actions"><button id="startBtn" class="primary big-btn">&#x2764;&#xFE0F; 나만의 최애 찾기</button></div>
+ <div class="hero-actions" aria-label="테스트 시작 영역">
 
- <section class="board"><div class="panel"><h2>&#x1F3C6; Top12 최애 랭킹</h2><ol id="topBoard" class="top-list"></ol><p class="note">실시간 LocalStorage 기준</p></div><div class="panel"><h2>&#x1F525; 현재 최애 분포</h2><div id="idolChart"></div><p class="note">참가자들의 매칭 결과 분포</p></div></section>
+  <p class="start-hint"><span class="hint-arrow">↓</span> 아래 버튼을 눌러 테스트를 시작하세요 <span class="hint-arrow">↓</span></p>
+
+  <button id="startBtn" class="primary big-btn" type="button" aria-label="나만의 최애 찾기 테스트 시작" title="눌러서 테스트 시작">&#x2764;&#xFE0F; 나만의 최애 찾기</button>
+
+ </div>
+
+ <div class="join-box">
+
+  <h2>&#x1F4F1; 휴대폰으로 참여하기</h2>
+
+  <img
+
+    src="qr-code.svg"
+
+    alt="참여 QR 코드"
+
+    class="qr-image"
+
+  >
+
+  <p class="url-label">QR을 스캔하거나 URL을 입력하여 참여하세요.</p>
+
+  <div class="url-box">
+
+    https://bojoke77.github.io/KH/
+
+  </div>
+
+
+
+ </div>
+
+ <section class="board"><div class="panel"><h2>&#x1F3C6; Top12 최애 랭킹</h2><ol id="topBoard" class="top-list"></ol><p class="note"></p></div><div class="panel"><h2>&#x1F525; 현재 최애 분포</h2><div id="idolChart"></div><p class="note">참가자들의 매칭 결과 분포</p></div></section>
 
  <div class="admin"><button id="adminBtn">&#x1F512; 관리자</button></div>
 
@@ -94,6 +126,12 @@
 
 </main>
 
-<div id="adminModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="adminTitle"><div class="modal-box admin-box"><div class="modal-head"><h3 id="adminTitle">관리자 관리</h3><button id="closeAdmin" class="close" aria-label="관리자 관리창 닫기">&#x2715;</button></div><p class="note">관리자 인증 후 명예의 전당 기록을 수정하거나 초기화할 수 있습니다.</p><div id="adminAuth"><input id="adminPassword" type="password" maxlength="4" placeholder="비밀번호 4자리"><div id="adminError" class="error hidden">비밀번호가 올바르지 않습니다.</div><div class="actions"><button id="cancelAdmin" class="secondary">취소</button><button id="confirmAdmin" class="primary">관리자 화면 열기</button></div></div><div id="adminEditor" class="hidden"><div class="admin-toolbar"><strong>현재 참가 기록</strong><span id="adminRecordCount" class="note"></span></div><div id="adminRecords" class="admin-records"></div><div class="actions"><button id="saveAdmin" class="primary">수정 내용 저장</button><button id="resetAdmin" class="danger">전체 기록 초기화</button></div></div></div></div>  <script src="idol.js"></script>
+<div id="adminModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="adminTitle"><div class="modal-box admin-box"><div class="modal-head"><h3 id="adminTitle">관리자 관리</h3><button id="closeAdmin" class="close" aria-label="관리자 관리창 닫기">&#x2715;</button></div><p class="note">관리자 인증 후 명예의 전당 기록을 수정하거나 초기화할 수 있습니다.</p><div id="adminAuth"><input id="adminPassword" type="password" maxlength="4" placeholder="비밀번호 4자리"><div id="adminError" class="error hidden">비밀번호가 올바르지 않습니다.</div><div class="actions"><button id="cancelAdmin" class="secondary">취소</button><button id="confirmAdmin" class="primary">관리자 화면 열기</button></div></div><div id="adminEditor" class="hidden"><div class="admin-toolbar"><strong>현재 참가 기록</strong><span id="adminRecordCount" class="note"></span></div><div id="adminRecords" class="admin-records"></div><div class="actions"><button id="saveAdmin" class="primary">수정 내용 저장</button><button id="resetAdmin" class="danger">전체 기록 초기화</button></div></div></div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+<script src="idol.js"></script>
 
 </body></html>
