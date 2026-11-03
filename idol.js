@@ -172,13 +172,19 @@ const idols = [
 
 ];
 
-const rankingKey='idolRanking';let answers=[],questionIndex=0,selectedBonus=null,lastResult=null,activeQuestionIndexes=[],studentInfo=null;
+const firebaseConfig={apiKey:'AIzaSyC8Y8HrE2KD z6aBAG7chVDFj5esnu7EvM'.replace(/ /g,''),authDomain:'kh-ai-12300.firebaseapp.com',projectId:'kh-ai-12300',storageBucket:'kh-ai-12300.firebasestorage.app',messagingSenderId:'931616517001',appId:'1:931616517001:web:3566b7d54c1d79e278f58',measurementId:'G-8XEEBK4CG'};
+
+firebase.initializeApp(firebaseConfig);const db=firebase.firestore(),rankingCollection=db.collection('ranking');
+
+let answers=[],questionIndex=0,selectedBonus=null,lastResult=null,activeQuestionIndexes=[],studentInfo=null;
 
 const $=id=>document.getElementById(id);
 
 
 
-function getRankings(){try{return JSON.parse(localStorage.getItem(rankingKey)||'[]')}catch{return []}}
+async function getRankings(){const snap=await rankingCollection.get();return snap.docs.map(doc=>({id:doc.id,...doc.data()}))}
+
+function timeOf(x){return x?.createdAt?.toMillis?.()||Number(x?.createdAt)||0}
 
 
 
@@ -190,9 +196,9 @@ function show(id){document.querySelectorAll('.flow').forEach(x=>x.classList.remo
 
 
 
-function refreshHome(){const all=getRankings(),best=all.reduce((m,x)=>Math.max(m,x.score||0),0);$('participantCount').textContent=all.length+'명';$('bestScore').textContent=best+'%';
+async function refreshHome(){const all=await getRankings(),best=all.reduce((m,x)=>Math.max(m,x.score||0),0);$('participantCount').textContent=all.length+'명';$('bestScore').textContent=best+'%';
 
-const top=all.slice().sort((a,b)=>b.score-a.score||a.at-b.at).slice(0,12);$('topBoard').innerHTML=top.length?top.map((x,i)=>`<li><span class="medal">${i<3?['&#x1F947;','&#x1F948;','&#x1F949;'][i]:i+1}</span><span class="top-main"><span class="top-name">${esc(x.name)}</span><span class="top-meta">${esc(x.grade||'')} ${esc(x.className||'')}반 ${esc(x.number||'')}번</span></span><span class="top-idol">
+const top=all.slice().sort((a,b)=>b.score-a.score||timeOf(a)-timeOf(b)).slice(0,12);$('topBoard').innerHTML=top.length?top.map((x,i)=>`<li><span class="medal">${i<3?['&#x1F947;','&#x1F948;','&#x1F949;'][i]:i+1}</span><span class="top-main"><span class="top-name">${esc(x.nickname)}</span><span class="top-meta">${esc(x.grade||'')} ${esc(x.class||'')}반 ${esc(x.number||'')}번</span></span><span class="top-idol">
 
   <img
 
@@ -238,7 +244,7 @@ function begin(){answers=[];questionIndex=0;activeQuestionIndexes=[];studentInfo
 
 
 
-function startQuestions(){const name=$('studentName').value.trim(),grade=$('studentGrade').value,className=$('studentClass').value.trim(),number=$('studentNumber').value.trim();if(!name||!grade||!className||!number){$('nameError').classList.remove('hidden');return}studentInfo={name,grade,className,number};activeQuestionIndexes=Array.from({length:questions.length},(_,i)=>i).sort(()=>Math.random()-.5).slice(0,10);$('nameError').classList.add('hidden');setStep('step2');renderQuestion()}
+function startQuestions(){const nickname=$('studentName').value.trim(),grade=$('studentGrade').value,className=$('studentClass').value.trim(),number=$('studentNumber').value.trim();if(!nickname||!grade||!className||!number){$('nameError').classList.remove('hidden');return}studentInfo={nickname,grade,class:className,number};activeQuestionIndexes=Array.from({length:questions.length},(_,i)=>i).sort(()=>Math.random()-.5).slice(0,10);$('nameError').classList.add('hidden');setStep('step2');renderQuestion()}
 
 
 
@@ -270,11 +276,11 @@ function titleFor(s){return s>=100?'&#x1F308; 운명의 최애':s>=98?'&#x1F451;
 
 
 
-function saveRecord(name,score,idol){const current=getRankings(),all=current.filter(x=>!(x.name===name&&x.grade===studentInfo.grade&&x.className===studentInfo.className&&x.number===studentInfo.number)),old=current.find(x=>x.name===name&&x.grade===studentInfo.grade&&x.className===studentInfo.className&&x.number===studentInfo.number);all.push(!old||score>=old.score?{...studentInfo,name,score,idol,at:Date.now()}:old);all.sort((a,b)=>b.score-a.score||a.at-b.at);localStorage.setItem(rankingKey,JSON.stringify(all));return all}
+async function saveRecord(nickname,score,idol){const current=await getRankings(),old=current.find(x=>x.nickname===nickname&&x.grade===studentInfo.grade&&x.class===studentInfo.class&&String(x.number)===String(studentInfo.number));if(old&&score<old.score)return current;const record={nickname,grade:studentInfo.grade,class:studentInfo.class,number:studentInfo.number,idol,score,createdAt:firebase.firestore.FieldValue.serverTimestamp()};if(old?.id)await rankingCollection.doc(old.id).set(record);else await rankingCollection.add(record);return getRankings()}
 
 
 
-function calculate(){const name=studentInfo.name,user=activeQuestionIndexes.map(questionId=>({index:questionId,value:options[questionId][answers[questionId]??1]})),history=getRankings(),counts=history.reduce((map,x)=>(map[x.idol]=(map[x.idol]||0)+1,map),{}),dogSelected=answers[6]===0;
+async function calculate(){const name=studentInfo.nickname,user=activeQuestionIndexes.map(questionId=>({index:questionId,value:options[questionId][answers[questionId]??1]})),history=await getRankings(),counts=history.reduce((map,x)=>(map[x.idol]=(map[x.idol]||0)+1,map),{}),dogSelected=answers[6]===0;
 
 const candidates=dogSelected?idols.filter(idol=>!['카리나','원이'].includes(idol.name)):idols;
 
@@ -282,11 +288,11 @@ const scored=candidates.map(idol=>{let diff=0;user.forEach(({index,value})=>diff
 
 const base=Math.max(40,Math.round(100-diff/(user.length*100)*60));const picked=counts[idol.name]||0;const diversityBonus=picked===0?4:picked===1?1:0;return {idol,match:Math.min(100,base+(selectedBonus||0)+diversityBonus),base,diversityBonus}}).sort((a,b)=>b.match-a.match);
 
-const top=scored[0],all=saveRecord(name,top.match,top.idol.name),rank=1+all.filter(x=>x.score>top.match).length;lastResult={name,studentInfo,top,all,rank,bonus:selectedBonus||0};renderResult()}
+const top=scored[0],all=await saveRecord(name,top.match,top.idol.name),rank=1+all.filter(x=>x.score>top.match).length;lastResult={name,studentInfo,top,all,rank,bonus:selectedBonus||0};renderResult()}
 
 
 
-function qrText(){const {name,top,all,rank,bonus}=lastResult;return ['AI 최애 찾기','━━━━━━━━━━━━','이름: '+studentInfo.name,'학년: '+studentInfo.grade,'반: '+studentInfo.className,'번호: '+studentInfo.number,'당신의 최애: '+top.idol.name,'매칭률: '+top.match+'%','등급: '+grade(top.match),'럭키박스: +'+bonus+'%','내 순위: '+rank+'위 / '+all.length+'명','','Top12 랭킹',...all.slice(0,12).map((x,i)=>`${i+1}. ${x.name} ${x.score}% ${x.idol}`),'','LOVE RESULT'].join('\n')}
+function qrText(){const {name,top,all,rank,bonus}=lastResult;return ['AI 최애 찾기','━━━━━━━━━━━━','이름: '+studentInfo.nickname,'학년: '+studentInfo.grade,'반: '+studentInfo.class,'번호: '+studentInfo.number,'당신의 최애: '+top.idol.name,'매칭률: '+top.match+'%','등급: '+grade(top.match),'럭키박스: +'+bonus+'%','내 순위: '+rank+'위 / '+all.length+'명','','Top12 랭킹',...all.slice(0,12).map((x,i)=>`${i+1}. ${x.nickname} ${x.score}% ${x.idol}`),'','LOVE RESULT'].join('\n')}
 
 
 
@@ -304,7 +310,7 @@ const report=[['외향성',Math.round(answers[0]===0?90:answers[0]===1?65:40)],[
 
 const top3=all.slice(0,3);$('result').innerHTML=`<div class="result-head"><div class="step-title"><small>STEP 5</small><h2>&#x1F31F; 당신의 최애는</h2></div><img class="idol-photo" src="img/${top.idol.file}" alt="${top.idol.name} 사진"><h1>${top.idol.name}</h1><p class="title-badge">${titleFor(score)}</p><div class="match">${score}%</div><div class="grade">&#x1F3C6; ${g}</div><p class="note">럭키박스 보너스 +${bonus}% 적용</p><div class="comment">${comment}</div></div>
 
-<div class="stat"><span>&#x1F3C5; 현재 순위</span><b>${rank}위 / ${all.length}명</b></div><div class="stat"><span>&#x1F381; 럭키박스</span><b>+${bonus}%</b></div></div><h2>&#x1F3C6; Top3</h2><div class="rank-cards">${top3.map((x,i)=>`<div class="rank-card"><b>${['&#x1F947;','&#x1F948;','&#x1F949;'][i]} ${esc(x.name)}</b><small>${x.score}% · ${x.idol}</small></div>`).join('')}</div><div class="qr"><h2>&#x1F4F1; 결과 QR</h2><canvas id="qrCanvas" width="520" height="520"></canvas></div><div class="actions"><button id="savePng" class="secondary">&#x1F4F8; PNG 저장</button><button id="retry" class="primary">&#x1F504; 다시 도전</button><button id="homeFromResult" class="secondary">&#x1F3E0; 첫 화면</button></div>`;
+<div class="stat"><span>&#x1F3C5; 현재 순위</span><b>${rank}위 / ${all.length}명</b></div><div class="stat"><span>&#x1F381; 럭키박스</span><b>+${bonus}%</b></div></div><h2>&#x1F3C6; Top3</h2><div class="rank-cards">${top3.map((x,i)=>`<div class="rank-card"><b>${['&#x1F947;','&#x1F948;','&#x1F949;'][i]} ${esc(x.nickname)}</b><small>${x.score}% · ${x.idol}</small></div>`).join('')}</div><div class="qr"><h2>&#x1F4F1; 결과 QR</h2><canvas id="qrCanvas" width="520" height="520"></canvas></div><div class="actions"><button id="savePng" class="secondary">&#x1F4F8; PNG 저장</button><button id="retry" class="primary">&#x1F504; 다시 도전</button><button id="homeFromResult" class="secondary">&#x1F3E0; 첫 화면</button></div>`;
 
 const img=document.querySelector('.idol-photo');img.onerror=()=>{img.src='data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="100%" height="100%" fill="#ff7aa8"/><text x="50%" y="55%" text-anchor="middle" font-size="180" fill="white">${top.idol.name.slice(0,1)}</text></svg>`)};
 
@@ -324,11 +330,11 @@ const a=document.createElement('a');a.download='ai-favorite-result.png';a.href=c
 
 function adminInput(value,field,type='text'){return `<input type="${type}" data-field="${field}" value="${esc(value??'')}">`}
 
-function renderAdminEditor(){const all=getRankings();$('adminRecordCount').textContent=`${all.length}건`;if(!all.length){$('adminRecords').innerHTML='<p class="note">수정할 참가 기록이 없습니다.</p>';return}
+async function renderAdminEditor(){const all=await getRankings();$('adminRecordCount').textContent=`${all.length}건`;if(!all.length){$('adminRecords').innerHTML='<p class="note">수정할 참가 기록이 없습니다.</p>';return}
 
-$('adminRecords').innerHTML=`<table class="admin-table"><thead><tr><th>#</th><th>이름</th><th>학년</th><th>반</th><th>번호</th><th>매칭률</th><th>등급</th><th>최애</th></tr></thead><tbody>${all.map((x,i)=>`<tr data-record-index="${i}"><td class="record-index">${i+1}</td><td>${adminInput(x.name,'name')}</td><td>${adminInput(x.grade,'grade')}</td><td>${adminInput(x.className,'className','text')}</td><td>${adminInput(x.number,'number','text')}</td><td>${adminInput(x.score,'score','number')}</td><td><span class="top-grade">${grade(x.score||0)}</span></td><td><select data-field="idol">${idols.map(idol=>`<option value="${esc(idol.name)}" ${idol.name===x.idol?'selected':''}>${esc(idol.name)}</option>`).join('')}</select></td></tr>`).join('')}</tbody></table>`}
+ $('adminRecords').innerHTML=`<table class="admin-table"><thead><tr><th>#</th><th>닉네임</th><th>학년</th><th>반</th><th>번호</th><th>매칭률</th><th>등급</th><th>최애</th></tr></thead><tbody>${all.map((x,i)=>`<tr data-record-index="${i}"><td class="record-index">${i+1}</td><td>${adminInput(x.nickname,'nickname')}</td><td>${adminInput(x.grade,'grade')}</td><td>${adminInput(x.class,'class','text')}</td><td>${adminInput(x.number,'number','text')}</td><td>${adminInput(x.score,'score','number')}</td><td><span class="top-grade">${grade(x.score||0)}</span></td><td><select data-field="idol">${idols.map(idol=>`<option value="${esc(idol.name)}" ${idol.name===x.idol?'selected':''}>${esc(idol.name)}</option>`).join('')}</select></td></tr>`).join('')}</tbody></table>`}
 
-function saveAdminRecords(){const rows=[...document.querySelectorAll('#adminRecords tr[data-record-index]')],all=getRankings();rows.forEach(row=>{const i=Number(row.dataset.recordIndex),get=field=>row.querySelector(`[data-field="${field}"]`)?.value.trim(),score=Math.max(0,Math.min(100,Number(get('score'))||0));if(all[i])Object.assign(all[i],{name:get('name')||all[i].name,grade:get('grade')||all[i].grade||'',className:get('className')||all[i].className||'',number:get('number')||all[i].number||'',score,idol:get('idol')||all[i].idol})});all.sort((a,b)=>b.score-a.score||a.at-b.at);localStorage.setItem(rankingKey,JSON.stringify(all));renderAdminEditor();refreshHome();alert('참가 기록을 저장했습니다.')}
+async function saveAdminRecords(){const rows=[...document.querySelectorAll('#adminRecords tr[data-record-index]')],all=await getRankings();for(const row of rows){const i=Number(row.dataset.recordIndex),get=field=>row.querySelector(`[data-field="${field}"]`)?.value.trim(),score=Math.max(0,Math.min(100,Number(get('score'))||0));if(all[i]?.id)await rankingCollection.doc(all[i].id).update({nickname:get('nickname')||all[i].nickname,grade:get('grade')||all[i].grade||'',class:get('class')||all[i].class||'',number:get('number')||all[i].number||'',score,idol:get('idol')||all[i].idol})}await renderAdminEditor();await refreshHome();alert('참가 기록을 저장했습니다.')}
 
 function openAdmin(){ $('adminModal').classList.add('show');$('adminPassword').value='';$('adminError').classList.add('hidden');$('adminAuth').classList.remove('hidden');$('adminEditor').classList.add('hidden');$('adminPassword').focus()}
 
@@ -336,7 +342,7 @@ function closeAdmin(){$('adminModal').classList.remove('show')}
 
 function unlockAdmin(){if($('adminPassword').value==='2027'){$('adminAuth').classList.add('hidden');$('adminEditor').classList.remove('hidden');renderAdminEditor()}else $('adminError').classList.remove('hidden')}
 
- $('startBtn').addEventListener('click',begin);$('homeBtn').addEventListener('click',goHome);$('nameNext').addEventListener('click',startQuestions);$('studentName').addEventListener('keydown',e=>{if(e.key==='Enter')startQuestions()});$('nextQuestion').addEventListener('click',nextQuestion);$('prevQuestion').addEventListener('click',prevQuestion);document.querySelectorAll('.box-choice').forEach(b=>b.addEventListener('click',()=>openBox(b)));$('adminBtn').addEventListener('click',openAdmin);$('closeAdmin').addEventListener('click',closeAdmin);$('cancelAdmin').addEventListener('click',closeAdmin);$('adminModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAdmin()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('adminModal').classList.contains('show'))closeAdmin()});$('confirmAdmin').addEventListener('click',unlockAdmin);$('saveAdmin').addEventListener('click',saveAdminRecords);$('resetAdmin').addEventListener('click',()=>{if(confirm('모든 참가 기록을 초기화할까요?')){localStorage.removeItem(rankingKey);renderAdminEditor();refreshHome();alert('명예의 전당을 초기화했습니다.')}});$('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter')unlockAdmin()});refreshHome();
+ $('startBtn').addEventListener('click',begin);$('homeBtn').addEventListener('click',goHome);$('nameNext').addEventListener('click',startQuestions);$('studentName').addEventListener('keydown',e=>{if(e.key==='Enter')startQuestions()});$('nextQuestion').addEventListener('click',nextQuestion);$('prevQuestion').addEventListener('click',prevQuestion);document.querySelectorAll('.box-choice').forEach(b=>b.addEventListener('click',()=>openBox(b)));$('adminBtn').addEventListener('click',openAdmin);$('closeAdmin').addEventListener('click',closeAdmin);$('cancelAdmin').addEventListener('click',closeAdmin);$('adminModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAdmin()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('adminModal').classList.contains('show'))closeAdmin()});$('confirmAdmin').addEventListener('click',unlockAdmin);$('saveAdmin').addEventListener('click',saveAdminRecords);$('resetAdmin').addEventListener('click',async()=>{if(confirm('모든 참가 기록을 초기화할까요?')){const snap=await rankingCollection.get();const batch=db.batch();snap.docs.forEach(doc=>batch.delete(doc.ref));await batch.commit();await renderAdminEditor();await refreshHome();alert('명예의 전당을 초기화했습니다.')}});$('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter')unlockAdmin()});refreshHome();
 
 
 
@@ -2648,3 +2654,4 @@ window.QRCodeLocal = load('./index');
 window.QRErrorCorrectLevelLocal = load('./QRErrorCorrectLevel');
 
 })();
+
